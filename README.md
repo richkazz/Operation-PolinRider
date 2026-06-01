@@ -24,6 +24,7 @@ Operation PolinRider is intended to be useful as a repository you can clone, run
 - reusable Python package under `src/polinrider_guard/`;
 - command-line entry points for each scanner;
 - thin scripts under `scripts/` for direct execution without installation;
+- surgical cleaning tools for enterprise recovery after an incident;
 - pytest coverage for every scanner and every script wrapper;
 - runnable clean and vulnerable examples under `examples/`;
 - a documented threat model that separates stable detection logic from fast-changing campaign claims;
@@ -82,6 +83,15 @@ not produce findings.
 | `polinrider-scan-masquerade PATH` | Find script-like content hidden behind binary extensions. |
 | `polinrider-scan-vscode PATH` | Inspect `.vscode/tasks.json` for risky folder-open execution patterns. |
 | `polinrider-scan-git-dates PATH` | Find commits with large author/committer date skew across all refs. |
+
+### Enterprise recovery tools
+
+| Script | Purpose |
+| --- | --- |
+| `scripts/surgical-clean.py` | Surgically remove PolinRider payloads from git history across all branches using `git-filter-repo`. |
+| `scripts/batch-clean.sh` | Automate recovery, verification, and force-pushing for multiple repositories. |
+
+See [`docs/ENTERPRISE_RECOVERY.md`](docs/ENTERPRISE_RECOVERY.md) for detailed instructions on using these tools.
 
 Each command supports `--json` for automation. Commands exit `1` when they produce findings and `0`
 when no findings are present.

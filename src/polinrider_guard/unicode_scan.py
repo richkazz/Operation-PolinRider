@@ -60,6 +60,10 @@ def scan_file(path: Path) -> list[Finding]:
     if path.suffix.lower() not in TEXT_EXTENSIONS:
         return []
     try:
+        if path.stat().st_mode & 0o444 == 0:
+            return [
+                Finding("file.read_error", "low", "file has no read permission bits", path=path)
+            ]
         data = path.read_bytes()
     except OSError as exc:
         return [Finding("file.read_error", "low", str(exc), path=path)]
