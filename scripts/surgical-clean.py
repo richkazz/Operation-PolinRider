@@ -148,11 +148,27 @@ def main():
     filter_args.force = True
     filter_args.prune_empty = 'never'
 
-    repo_filter = fr.RepoFilter(
-        filter_args,
-        blob_callback=cleaner.clean_blob
-    )
-    repo_filter.run()
+    if args.dry_run:
+        # git-filter-repo's dry-run support writes preview fast-export files
+        # without updating refs or deleting remotes. Blob callbacks must mutate
+        # the in-memory blob object for the preview export to show the cleanup,
+        # so keep a separate reporting cleaner whose counters are copied back.
+        filter_args.dry_run = True
+        preview_cleaner = SurgicalCleaner(dry_run=False, verbose=args.verbose)
+        repo_filter = fr.RepoFilter(
+            filter_args,
+            blob_callback=preview_cleaner.clean_blob
+        )
+        repo_filter.run()
+        cleaner.blobs_scanned = preview_cleaner.blobs_scanned
+        cleaner.blobs_cleaned = preview_cleaner.blobs_cleaned
+        cleaner.lines_removed = preview_cleaner.lines_removed
+    else:
+        repo_filter = fr.RepoFilter(
+            filter_args,
+            blob_callback=cleaner.clean_blob
+        )
+        repo_filter.run()
     cleaner.print_summary()
     return 0 if cleaner.blobs_cleaned == 0 else 1
 
