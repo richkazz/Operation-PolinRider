@@ -1,0 +1,79 @@
+name: PolinRider Guard
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: polinrider-guard-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Tests and lint (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install project with development dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Run unit and wrapper tests
+        run: python -m pytest
+
+      - name: Run lint checks
+        run: python -m ruff check .
+
+  guard-scan:
+    name: Repository protection scan
+    runs-on: ubuntu-latest
+    needs: test
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install project
+        run: python -m pip install -e .
+
+      - name: Scan repository sources and docs
+        run: |
+          polinrider-guard src --no-git --json
+          polinrider-guard scripts --no-git --json
+          polinrider-guard docs --no-git --json
+          polinrider-guard examples/clean-project --no-git --json
+
+      - name: Verify vulnerable example still trips protections
+        run: |
+          if polinrider-guard examples/vulnerable-samples --no-git --json; then
+            echo "::error::The intentionally vulnerable example did not produce findings."
+            exit 1
+          fi
