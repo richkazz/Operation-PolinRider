@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "polinrider-guard"
+version = "0.1.0"
+description = "Cross-platform defensive scanners for PolinRider/GlassWorm-style developer supply-chain indicators."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Operation PolinRider contributors" }]
+keywords = ["security", "supply-chain", "malware", "unicode", "github", "vscode"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Information Technology",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Security",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "ruff>=0.6",
+]
+
+[project.scripts]
+polinrider-guard = "polinrider_guard.cli:main"
+polinrider-scan-unicode = "polinrider_guard.unicode_scan:main"
+polinrider-scan-git-dates = "polinrider_guard.git_dates:main"
+polinrider-scan-masquerade = "polinrider_guard.masquerade:main"
+polinrider-scan-vscode = "polinrider_guard.vscode_tasks:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
