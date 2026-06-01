@@ -22,6 +22,12 @@ classifiers = [
   "Topic :: Security",
 ]
 
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "ruff>=0.6",
+]
+
 [project.scripts]
 polinrider-guard = "polinrider_guard.cli:main"
 polinrider-scan-unicode = "polinrider_guard.unicode_scan:main"

@@ -1,34 +1,33 @@
 # Operation PolinRider
 
-Operation PolinRider turns the original long-form incident-response article into a small,
-testable, cross-platform defensive toolkit. The goal is not to prove every public campaign claim
-inside this repository; the goal is to give developers and security teams practical checks they can
-run before opening, installing, or trusting an unfamiliar project.
+Operation PolinRider is a complete defensive engineering project for checking repositories before
+opening, installing, or trusting them. It packages the operation as runnable code, examples, tests,
+and documentation rather than prose-only guidance.
 
-The project focuses on structural behaviors reported across PolinRider, GlassWorm, BeaverTail,
+The project focuses on structural behaviors associated with PolinRider, GlassWorm, BeaverTail,
 Trojan Source, and adjacent developer supply-chain incidents:
 
 - invisible Unicode/private-use characters in source files;
-- script payloads hidden behind binary-looking extensions such as `.woff2` or images;
-- VS Code folder-open tasks that execute hidden payloads;
+- script payloads hidden behind binary-looking extensions such as `.woff2`, images, or `.wasm`;
+- VS Code folder-open tasks that execute hidden or disguised payloads;
 - suspicious git author-date versus committer-date gaps that may indicate history rewriting.
 
 > **Verification note:** campaign names, repository counts, infrastructure, and attribution can change
 > quickly. Treat this repository as tested defensive tooling, not as a primary threat-intelligence feed.
-> See [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) for what the project deliberately encodes as
-> stable engineering assumptions.
+> See [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) for the assumptions this project deliberately
+> encodes as stable, testable engineering checks.
 
-## Why this exists
+## What this project provides
 
-The original article was useful as a narrative guide, but narrative code is hard to test, hard to run
-on every operating system, and easy to copy incorrectly. This repository is structured as a GitHub
-project instead:
+Operation PolinRider is intended to be useful as a repository you can clone, run, extend, and test:
 
 - reusable Python package under `src/polinrider_guard/`;
 - command-line entry points for each scanner;
-- thin scripts under `scripts/` for direct execution;
+- thin scripts under `scripts/` for direct execution without installation;
 - pytest coverage for every scanner and every script wrapper;
-- runnable clean and vulnerable examples under `examples/`.
+- runnable clean and vulnerable examples under `examples/`;
+- a documented threat model that separates stable detection logic from fast-changing campaign claims;
+- a GitHub Actions workflow that can be required as a branch protection check.
 
 ## Public references to review
 
@@ -60,6 +59,20 @@ Expected behavior:
 - `examples/clean-project` exits `0` and prints `No findings.`
 - `examples/vulnerable-samples` exits `1` and reports sample findings.
 
+## Recommended repository intake workflow
+
+Use this workflow before opening an unfamiliar repository in an IDE or running project scripts:
+
+1. Clone or unpack the project into a temporary directory.
+2. Run `polinrider-guard PATH --json` and save the output if you need an audit trail.
+3. Review any findings before opening the folder in VS Code or another editor that may auto-run tasks.
+4. If findings are expected test fixtures, document the exception and keep them isolated.
+5. If findings are unexpected, do not run package-manager install scripts, build hooks, or IDE tasks until
+   the repository has been reviewed by someone responsible for security.
+
+A clean scan is not proof that a repository is safe. It only means these specific structural checks did
+not produce findings.
+
 ## CLI commands
 
 | Command | Purpose |
@@ -70,7 +83,8 @@ Expected behavior:
 | `polinrider-scan-vscode PATH` | Inspect `.vscode/tasks.json` for risky folder-open execution patterns. |
 | `polinrider-scan-git-dates PATH` | Find commits with large author/committer date skew across all refs. |
 
-Each command supports `--json` for automation.
+Each command supports `--json` for automation. Commands exit `1` when they produce findings and `0`
+when no findings are present.
 
 The same checks can be run through the direct wrapper scripts:
 
@@ -81,6 +95,32 @@ python scripts/scan-masquerade.py --help
 python scripts/scan-vscode-tasks.py --help
 python scripts/scan-git-dates.py --help
 ```
+
+## What each scanner checks
+
+### Invisible Unicode scanner
+
+The Unicode scanner examines source-like files for zero-width characters, bidirectional controls,
+variation selectors, and private-use characters. These characters can be legitimate in some projects,
+but they are unusual in most source code and should be reviewed when they appear unexpectedly.
+
+### Binary-extension masquerade scanner
+
+The masquerade scanner checks binary-looking file extensions for readable script markers, invalid magic
+bytes, and known endpoint strings. It is designed around the principle that file extensions are labels,
+not security boundaries.
+
+### VS Code task scanner
+
+The VS Code scanner reads `.vscode/tasks.json` and looks for folder-open tasks that hide output or invoke
+an interpreter against a disguised binary asset. This catches a risky behavior pattern rather than a
+single hard-coded filename.
+
+### Git date-skew scanner
+
+The git scanner compares author dates and committer dates across all refs. Large unexplained gaps are an
+investigation signal because they can appear when history is rewritten or commits are backdated. This is
+not a standalone proof of compromise.
 
 ## Examples
 
@@ -103,6 +143,18 @@ The vulnerable sample contains:
 - a `.vscode/tasks.json` folder-open task that runs `node ./assets.woff2` while hiding output.
 
 These examples are inert and exist only to keep the scanners demonstrable and testable.
+
+
+## GitHub Actions protection
+
+This repository includes `.github/workflows/polinrider-guard.yml` so the operation can protect pull
+requests, not just local machines. The workflow runs tests, linting, repository scans against source and
+documentation paths, and a negative-control scan that confirms the intentionally vulnerable example still
+produces findings.
+
+To make the check enforceable, configure branch protection or a ruleset that requires the workflow status
+checks before merging. See [`docs/GITHUB_PROTECTION.md`](docs/GITHUB_PROTECTION.md) for the recommended
+required checks and protection settings.
 
 ## Development
 

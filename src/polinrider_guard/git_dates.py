@@ -4,7 +4,7 @@ import argparse
 import json
 import subprocess
 import sys
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from .models import Finding
@@ -21,7 +21,7 @@ def is_git_repo(path: Path) -> bool:
 
 
 def parse_epoch(value: str) -> datetime:
-    return datetime.fromtimestamp(int(value), tz=UTC)
+    return datetime.fromtimestamp(int(value), tz=timezone.utc)
 
 
 def scan_repo(path: Path, threshold_hours: int = 24) -> list[Finding]:
