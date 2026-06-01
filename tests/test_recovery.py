@@ -94,5 +94,31 @@ def test_surgical_clean(test_repo):
     commits = log_result.stdout.strip().split("\n")
     assert len(commits) == 4
 
+def test_surgical_clean_dry_run_preserves_worktree_and_writes_preview(test_repo):
+    try:
+        import git_filter_repo  # noqa: F401
+    except ImportError:
+        pytest.skip("git-filter-repo not installed, skipping surgical clean dry-run test")
+
+    before_head = run_git(["rev-parse", "HEAD"], test_repo).stdout.strip()
+    before_content = (test_repo / "app.js").read_text()
+
+    result = subprocess.run(
+        [sys.executable, str(SURGICAL_CLEAN), "--dry-run"],
+        cwd=test_repo,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    assert "DRY RUN - SURGICAL CLEAN SUMMARY" in result.stdout
+    assert run_git(["rev-parse", "HEAD"], test_repo).stdout.strip() == before_head
+    assert (test_repo / "app.js").read_text() == before_content
+
+    filtered_export = test_repo / ".git" / "filter-repo" / "fast-export.filtered"
+    assert filtered_export.exists()
+    assert b"global['_V']='8-st-demo'" not in filtered_export.read_bytes()
+
+
 if __name__ == "__main__":
     pass
