@@ -17,9 +17,10 @@ SUSPICIOUS_RANGES = (
     (0xE000, 0xF8FF, "private-use character"),
 )
 TEXT_EXTENSIONS = {
-    ".c", ".cc", ".cpp", ".cs", ".css", ".go", ".h", ".hpp", ".html", ".java",
-    ".js", ".jsx", ".json", ".md", ".mjs", ".py", ".rb", ".rs", ".sh", ".ts",
-    ".tsx", ".txt", ".yaml", ".yml",
+    ".bat", ".c", ".cc", ".cpp", ".cs", ".css", ".go", ".h", ".hpp", ".html",
+    ".java", ".js", ".jsx", ".json", ".kt", ".md", ".mjs", ".php", ".ps1",
+    ".py", ".rb", ".rs", ".sh", ".sql", ".swift", ".ts", ".tsx", ".txt",
+    ".yaml", ".yml",
 }
 
 

@@ -35,7 +35,8 @@ MAGIC_BYTES = {
     ".wasm": (b"\x00asm",),
 }
 SCRIPT_MARKERS = re.compile(
-    rb"(function\s*\(|=>\s*\{|require\s*\(|import\s+|eval\s*\(|global\s*\[|process\.)"
+    rb"(function\s*\(|=>\s*\{|require\s*\(|import\s+|eval\s*\(|global\s*\[|process\.|"
+    rb"exec\(|subprocess\.|os\.system)"
 )
 C2_MARKERS = re.compile(rb"(trongrid\.io|aptoslabs\.com|bsc-dataseed|solana|MemoSq4gq)", re.I)
 
