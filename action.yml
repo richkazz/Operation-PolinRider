@@ -21,7 +21,7 @@ runs:
   args:
     - ${{ inputs.path }}
     - ${{ inputs.json == 'true' && '--json' || '' }}
-    - ${{ inputs.no-git == 'true' && '--no-git' || '' }}
+    - ${{ inputs['no-git'] == 'true' && '--no-git' || '' }}
 
 branding:
   icon: 'shield'

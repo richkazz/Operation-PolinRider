@@ -176,8 +176,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Needed when git history checks are enabled.
       - uses: richkazz/Operation-PolinRider@v0.1.0
+        with:
+          path: '.'
+          no-git: 'false'
 ```
+
+If your workflow uses a source archive, disables checkout, runs in an environment without `git`, or does
+not need history analysis, skip the git-history scanner explicitly:
+
+```yaml
+- uses: richkazz/Operation-PolinRider@v0.1.0
+  with:
+    path: '.'
+    no-git: 'true'
+```
+
+The Docker action image includes `git` so the default history scan can run on GitHub-hosted runners after
+`actions/checkout`. Local and non-GitHub runs should either install `git` or pass `--no-git` to the CLI.
 
 ## Development
 

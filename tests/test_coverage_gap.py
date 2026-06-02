@@ -208,6 +208,7 @@ def test_git_dates_unparseable_epoch(tmp_path: Path, monkeypatch):
         stdout = "commit\x00author\x00invalid\x00invalid\x00subject\n"
         stderr = ""
     monkeypatch.setattr(subprocess, "run", lambda *args, **kwargs: MockResult())
+    monkeypatch.setattr("polinrider_guard.git_dates.git_is_available", lambda: True)
     monkeypatch.setattr("polinrider_guard.git_dates.is_git_repo", lambda p: True)
     findings = scan_repo(tmp_path)
     assert findings == []
@@ -219,6 +220,7 @@ def test_git_dates_log_failed(tmp_path: Path, monkeypatch):
         stdout = ""
         stderr = "error"
     monkeypatch.setattr(subprocess, "run", lambda *args, **kwargs: MockResult())
+    monkeypatch.setattr("polinrider_guard.git_dates.git_is_available", lambda: True)
     monkeypatch.setattr("polinrider_guard.git_dates.is_git_repo", lambda p: True)
     findings = scan_repo(tmp_path)
     assert len(findings) == 1
