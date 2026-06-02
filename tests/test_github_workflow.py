@@ -18,6 +18,8 @@ def test_github_workflow_exists_and_runs_required_checks() -> None:
     assert "polinrider-guard src --no-git --json" in text
     assert "polinrider-guard examples/clean-project --no-git --json" in text
     assert "polinrider-guard examples/vulnerable-samples --no-git --json" in text
+    assert "id: scan-repository" in text
+    assert "POLINRIDER_GITHUB_STEP_SUMMARY: 'false'" in text
 
 
 def test_branch_protection_documentation_names_required_checks() -> None:
@@ -35,4 +37,7 @@ def test_docker_action_handles_git_scans_and_hyphenated_no_git_input() -> None:
     dockerfile = DOCKERFILE.read_text(encoding="utf-8")
 
     assert "inputs['no-git'] == 'true'" in action
+    assert "findings-count:" in action
+    assert "highest-severity:" in action
+    assert "has-findings:" in action
     assert "apt-get install --no-install-recommends -y git" in dockerfile
