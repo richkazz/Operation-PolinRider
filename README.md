@@ -175,10 +175,11 @@ jobs:
   polinrider-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0  # Needed when git history checks are enabled.
-      - uses: richkazz/Operation-PolinRider@v0.1.0
+      - id: polinrider
+        uses: richkazz/Operation-PolinRider@v0.1.0
         with:
           path: '.'
           no-git: 'false'
@@ -196,6 +197,11 @@ not need history analysis, skip the git-history scanner explicitly:
 
 The Docker action image includes `git` so the default history scan can run on GitHub-hosted runners after
 `actions/checkout`. Local and non-GitHub runs should either install `git` or pass `--no-git` to the CLI.
+
+When the action finds issues, it fails the step, writes a Markdown summary to the GitHub Actions job
+summary, and exposes these step outputs for follow-up automation: `findings-count`, `highest-severity`,
+and `has-findings`. Use the summary to triage the exact rule IDs and paths, then take the suggested
+remediation actions before rerunning the workflow.
 
 ## Development
 

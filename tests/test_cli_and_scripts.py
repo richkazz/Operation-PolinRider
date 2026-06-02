@@ -45,3 +45,38 @@ def test_script_wrappers_only_import_main(monkeypatch) -> None:
             runpy.run_path(str(Path("scripts") / script_name), run_name="not_main")
         except SystemExit as exc:  # pragma: no cover - documents unexpected behavior
             raise AssertionError(f"{script_name} executed at import time") from exc
+
+
+def test_aggregate_cli_writes_github_outputs_and_summary(tmp_path: Path, monkeypatch) -> None:
+    (tmp_path / "bad.js").write_text("x\u200d\n", encoding="utf-8")
+    output_file = tmp_path / "github-output.txt"
+    summary_file = tmp_path / "github-summary.md"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(output_file))
+    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
+
+    assert main([str(tmp_path), "--no-git", "--json"]) == 1
+
+    output = output_file.read_text(encoding="utf-8")
+    assert "findings-count=1" in output
+    assert "highest-severity=high" in output
+    assert "has-findings=true" in output
+
+    summary = summary_file.read_text(encoding="utf-8")
+    assert "PolinRider Guard found **1** issue" in summary
+    assert "unicode.invisible_or_private_use" in summary
+    assert "Suggested actions" in summary
+    assert "Rerun the workflow after remediation" in summary
+
+
+def test_aggregate_cli_can_disable_github_summary(tmp_path: Path, monkeypatch) -> None:
+    (tmp_path / "bad.js").write_text("x\u200d\n", encoding="utf-8")
+    output_file = tmp_path / "github-output.txt"
+    summary_file = tmp_path / "github-summary.md"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(output_file))
+    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
+    monkeypatch.setenv("POLINRIDER_GITHUB_STEP_SUMMARY", "false")
+
+    assert main([str(tmp_path), "--no-git"]) == 1
+
+    assert "has-findings=true" in output_file.read_text(encoding="utf-8")
+    assert not summary_file.exists()
