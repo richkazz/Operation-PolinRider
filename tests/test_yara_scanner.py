@@ -1,6 +1,7 @@
 import pytest
-from pathlib import Path
-from polinrider_guard.yara_scanner import scan_path, HAS_YARA
+
+from polinrider_guard.yara_scanner import HAS_YARA, scan_path
+
 
 @pytest.mark.skipif(not HAS_YARA, reason="yara-python not installed")
 def test_yara_scanner_vulnerable_sample(tmp_path):
