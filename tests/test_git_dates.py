@@ -43,6 +43,20 @@ def test_non_git_repo_has_no_findings(tmp_path: Path) -> None:
     assert scan_repo(tmp_path) == []
 
 
+def test_git_checks_do_not_traceback_when_git_is_missing(monkeypatch, tmp_path: Path) -> None:
+    def missing_git(*_args: object, **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        raise FileNotFoundError("git")
+
+    monkeypatch.setattr(subprocess, "run", missing_git)
+
+    assert is_git_repo(tmp_path) is False
+    findings = scan_repo(tmp_path)
+
+    assert len(findings) == 1
+    assert findings[0].rule_id == "git.executable_missing"
+    assert "--no-git" in findings[0].message
+
+
 @pytest.mark.skipif(shutil.which("git") is None, reason="git is required for this test")
 def test_git_dates_script_exit_code(tmp_path: Path) -> None:
     run_git(tmp_path, "init")

@@ -2,6 +2,8 @@ from pathlib import Path
 
 WORKFLOW = Path(".github/workflows/polinrider-guard.yml")
 PROTECTION_DOC = Path("docs/GITHUB_PROTECTION.md")
+ACTION = Path("action.yml")
+DOCKERFILE = Path("Dockerfile")
 
 
 def test_github_workflow_exists_and_runs_required_checks() -> None:
@@ -26,3 +28,11 @@ def test_branch_protection_documentation_names_required_checks() -> None:
     assert "Tests and lint (Python 3.12)" in text
     assert "Repository protection scan" in text
     assert "Do not allow bypassing" in text
+
+
+def test_docker_action_handles_git_scans_and_hyphenated_no_git_input() -> None:
+    action = ACTION.read_text(encoding="utf-8")
+    dockerfile = DOCKERFILE.read_text(encoding="utf-8")
+
+    assert "inputs['no-git'] == 'true'" in action
+    assert "apt-get install --no-install-recommends -y git" in dockerfile

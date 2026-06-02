@@ -11,12 +11,15 @@ from .models import Finding
 
 
 def is_git_repo(path: Path) -> bool:
-    result = subprocess.run(
-        ["git", "-C", str(path), "rev-parse", "--is-inside-work-tree"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(path), "rev-parse", "--is-inside-work-tree"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        return False
     return result.returncode == 0 and result.stdout.strip() == "true"
 
 
@@ -25,6 +28,18 @@ def parse_epoch(value: str) -> datetime:
 
 
 def scan_repo(path: Path, threshold_hours: int = 24) -> list[Finding]:
+    if not git_is_available():
+        return [
+            Finding(
+                "git.executable_missing",
+                "medium",
+                (
+                    "git executable not found; install git or rerun with --no-git "
+                    "to skip history checks"
+                ),
+                path=path,
+            )
+        ]
     if not is_git_repo(path):
         return []
     fmt = "%H%x00%an%x00%at%x00%ct%x00%s"
@@ -70,6 +85,19 @@ def scan_repo(path: Path, threshold_hours: int = 24) -> list[Finding]:
                 )
             )
     return findings
+
+
+def git_is_available() -> bool:
+    try:
+        result = subprocess.run(
+            ["git", "--version"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        return False
+    return result.returncode == 0
 
 
 def build_parser() -> argparse.ArgumentParser:
