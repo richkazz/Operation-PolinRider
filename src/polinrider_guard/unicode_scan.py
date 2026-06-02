@@ -39,7 +39,31 @@ def scan_text(text: str, path: Path | None = None) -> list[Finding]:
             label = suspicious_codepoint(character)
             if label is None:
                 continue
-            codepoint = f"U+{ord(character):04X}"
+
+            # Heuristic: allow variation selectors and ZWJ in emoji/symbol contexts
+            idx = column - 1
+            codepoint_int = ord(character)
+            if codepoint_int == 0x200D:  # ZERO WIDTH JOINER
+                if 0 < idx < len(line) - 1:
+                    prev_char = line[idx - 1]
+                    next_char = line[idx + 1]
+                    prev_cat = unicodedata.category(prev_char)
+                    next_cat = unicodedata.category(next_char)
+                    # ZWJ allowed between symbols/modifiers or following a variation selector
+                    is_prev_emoji = prev_cat in ("So", "Sk") or (0xFE00 <= ord(prev_char) <= 0xFE0F)
+                    is_next_emoji = next_cat in ("So", "Sk")
+                    if is_prev_emoji and is_next_emoji:
+                        continue
+            elif 0xFE00 <= codepoint_int <= 0xFE0F and idx > 0:  # VARIATION SELECTOR 1-16
+                prev_char = line[idx - 1]
+                prev_cat = unicodedata.category(prev_char)
+                # VS is allowed if it follows a symbol, modifier, or digit (for keycaps)
+                if prev_cat in ("So", "Sk"):
+                    continue
+                if prev_cat == "Nd" and idx < len(line) - 1 and line[idx + 1] == "\u20E3":
+                    continue
+
+            codepoint = f"U+{codepoint_int:04X}"
             name = unicodedata.name(character, "UNKNOWN")
             findings.append(
                 Finding(
