@@ -5,13 +5,14 @@ import json
 import sys
 from pathlib import Path
 
-from . import git_dates, masquerade, unicode_scan, vscode_tasks
+from . import git_dates, masquerade, unicode_scan, vscode_tasks, yara_scanner
 from .models import Finding
 
 SCANNERS = {
     "unicode": unicode_scan.scan_path,
     "masquerade": masquerade.scan_path,
     "vscode": vscode_tasks.scan_path,
+    "yara": yara_scanner.scan_path,
 }
 
 

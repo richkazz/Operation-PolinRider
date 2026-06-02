@@ -166,6 +166,19 @@ To make the check enforceable, configure branch protection or a ruleset that req
 checks before merging. See [`docs/GITHUB_PROTECTION.md`](docs/GITHUB_PROTECTION.md) for the recommended
 required checks and protection settings.
 
+### Using the isolated GitHub Action
+
+You can also use this tool as a standalone GitHub Action in any repository:
+
+```yaml
+jobs:
+  polinrider-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: richkazz/Operation-PolinRider@v0.1.0
+```
+
 ## Development
 
 ```bash

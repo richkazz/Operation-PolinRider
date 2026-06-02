@@ -1,0 +1,28 @@
+name: 'PolinRider Guard'
+description: 'Defensive scanners for PolinRider/GlassWorm-style developer supply-chain indicators.'
+author: 'Operation PolinRider contributors'
+inputs:
+  path:
+    description: 'The path to scan'
+    required: false
+    default: '.'
+  json:
+    description: 'Emit JSON findings'
+    required: false
+    default: 'false'
+  no-git:
+    description: 'Skip git history checks'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.path }}
+    - ${{ inputs.json == 'true' && '--json' || '' }}
+    - ${{ inputs.no-git == 'true' && '--no-git' || '' }}
+
+branding:
+  icon: 'shield'
+  color: 'blue'
