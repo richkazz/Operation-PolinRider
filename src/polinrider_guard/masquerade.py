@@ -35,10 +35,16 @@ MAGIC_BYTES = {
     ".wasm": (b"\x00asm",),
 }
 SCRIPT_MARKERS = re.compile(
-    rb"(function\s*\(|=>\s*\{|require\s*\(|import\s+|eval\s*\(|global\s*\[|process\.|"
-    rb"exec\(|subprocess\.|os\.system)"
+    rb"(function\s*\(|!function\s*\(|=>\s*\{|require\s*\(|import\s+|eval\s*\(|global\s*\[|"
+    rb"process\.|exec\(|subprocess\.|os\.system|Buffer\.from\s*\(|atob\s*\(|"
+    rb"String\.fromCharCode\s*\(|var\s+_0x)"
 )
-C2_MARKERS = re.compile(rb"(trongrid\.io|aptoslabs\.com|bsc-dataseed|solana|MemoSq4gq)", re.I)
+C2_MARKERS = re.compile(
+    rb"(trongrid\.io|aptoslabs\.com|bsc-dataseed|solana|MemoSq4gq|aptos-mainnet\.nodereal)", re.I
+)
+IOC_MARKERS = re.compile(
+    rb"(rmcej.{0,5}otb|global\[.{0,3}_V.{0,3}\]\s*=\s*.{0,3}8-(st\d{1,3}|\d{3,4}))"
+)
 
 
 def printable_ratio(data: bytes) -> float:
@@ -91,6 +97,17 @@ def scan_file(path: Path) -> list[Finding]:
                 "Known endpoint or blockchain C2 marker appears in disguised file",
                 path=path,
                 evidence="endpoint marker",
+                metadata={"printable_ratio": round(ratio, 3), "entropy": round(file_entropy, 3)},
+            )
+        )
+    if IOC_MARKERS.search(data):
+        findings.append(
+            Finding(
+                "ioc.polinrider_version_or_marker",
+                "critical",
+                "Known PolinRider version tag or marker appears in file",
+                path=path,
+                evidence="PolinRider IOC marker",
                 metadata={"printable_ratio": round(ratio, 3), "entropy": round(file_entropy, 3)},
             )
         )

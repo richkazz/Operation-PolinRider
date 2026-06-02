@@ -26,7 +26,9 @@ classifiers = [
 dev = [
   "pytest>=8",
   "ruff>=0.6",
+  "yara-python>=4.5",
 ]
+yara = ["yara-python>=4.5"]
 
 [project.scripts]
 polinrider-guard = "polinrider_guard.cli:main"
@@ -37,6 +39,9 @@ polinrider-scan-vscode = "polinrider_guard.vscode_tasks:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+polinrider_guard = ["rules/*.yar"]
 
 [tool.pytest.ini_options]
 addopts = "-q"

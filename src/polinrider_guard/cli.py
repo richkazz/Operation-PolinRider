@@ -5,13 +5,14 @@ import json
 import sys
 from pathlib import Path
 
-from . import git_dates, masquerade, unicode_scan, vscode_tasks
+from . import git_dates, masquerade, unicode_scan, vscode_tasks, yara_scanner
 from .models import Finding
 
 SCANNERS = {
     "unicode": unicode_scan.scan_path,
     "masquerade": masquerade.scan_path,
     "vscode": vscode_tasks.scan_path,
+    "yara": yara_scanner.scan_path,
 }
 
 
@@ -33,6 +34,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    if argv is None:
+        argv = sys.argv[1:]
+    # Filter out empty strings passed by GitHub Actions conditional logic
+    argv = [arg for arg in argv if arg]
+
     args = build_parser().parse_args(argv)
     root = Path(args.path).resolve()
     findings = scan_all(root, include_git=not args.no_git)

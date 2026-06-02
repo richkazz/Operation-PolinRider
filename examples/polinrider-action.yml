@@ -1,0 +1,28 @@
+name: PolinRider Security Scan
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  scan:
+    name: PolinRider Guard Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for git-dates scanner to see full history
+
+      - name: Run PolinRider Guard
+        uses: richkazz/Operation-PolinRider@v0.1.0
+        with:
+          # Optional: Scan a specific subdirectory
+          path: '.'
+          # Optional: Emit JSON for audit trails
+          json: 'false'
+          # Optional: Skip git checks if fetch-depth: 0 is not used
+          no-git: 'false'
