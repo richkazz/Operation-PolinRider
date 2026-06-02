@@ -48,7 +48,7 @@ def scan_tasks_file(path: Path) -> list[Finding]:
         text = task_text(task)
         is_hidden_folder_open = (
             run_options.get("runOn") == "folderOpen"
-            and presentation.get("reveal") in {"never", "silent"}
+            and (presentation.get("reveal") in {"never", "silent"} or task.get("hide") is True)
         )
         if is_hidden_folder_open:
             findings.append(

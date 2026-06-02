@@ -33,6 +33,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    if argv is None:
+        argv = sys.argv[1:]
+    # Filter out empty strings passed by GitHub Actions conditional logic
+    argv = [arg for arg in argv if arg]
+
     args = build_parser().parse_args(argv)
     root = Path(args.path).resolve()
     findings = scan_all(root, include_git=not args.no_git)
