@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0  # Required for git-dates scanner to see full history
 
       - name: Run PolinRider Guard
-        uses: richkazz/Operation-PolinRider@v0.1.0
+        uses: richkazz/Operation-PolinRider@v0.1.2
         with:
           # Optional: Scan a specific subdirectory
           path: '.'
